@@ -1,6 +1,6 @@
-<div id="preloader"> <i class="circle-preloader"></i> <img src="img/core-img/salad.png" alt=""> </div>
+<div id="preloader"> <i class="circle-preloader"></i> <img src="img/core-img/salad.png" alt=""> </div> 
 <header class="header-area"> 
-  
+<?php include("Connections\cn.php");?>
     <!-- Top Header Area -->
   <div class="top-header-area">
     <div class="container h-100">
@@ -16,7 +16,7 @@
           <div class="top-social-info text-right">
           <a href="login.php"><i>Login </i></a>
           <a href="register.php"><i>Register</i></a>
-            <a href="#"><i class="fa fa-facebook" aria-hidden="true"></i></a> <a href="#"><i class="fa fa-instagram" aria-hidden="true"></i></a>
+            <a href="https://www.facebook.com/profile.php?id=100031270283472"><i class="fa fa-facebook" aria-hidden="true"></i></a> <a href="https://www.instagram.com/gurunanak.restaurant/"><i class="fa fa-instagram" aria-hidden="true"></i></a>
           
           </div>
         </div>
@@ -32,7 +32,7 @@
         <nav class="classy-navbar justify-content-between" id="deliciousNav"> 
           
           <!-- Logo --> 
-          <a class="nav-brand" href="index.php"><img src="img/core-img/logo.png" alt=""></a> 
+          <a class="nav-brand" href="index.php"><img src="img/core-img/logo.PNG" alt=""></a> 
           
           <!-- Navbar Toggler -->
           <div class="classy-navbar-toggler"> <span class="navbarToggler"><span></span><span></span><span></span></span> </div>
@@ -50,7 +50,24 @@
               <ul>
                 <li><a href="index.php">Home</a></li>
                 <li><a href="about.php">About Us</a></li>
-                <li><a href="">Food Menu </a></li>
+              
+                <li>
+                <a class="dropdown-toggle" data-toggle="dropdown" href="foodmenu.php">Food Menu </a>
+                <div class="dropdown-menu" style="min-width:0 !importantion ">
+         <?php
+         
+           $query="SELECT * FROM store_categories";
+           $result = $cn->query($query);
+          
+          
+           while($q = $result->fetch_assoc()){ ?>
+            <a href="menu_list.php?c=<?php echo $q['c_name'] ?>"> 
+           <?php echo $q["c_name"];?>
+            </a>
+           <?php }
+         ?>
+                 </div>
+                </li>
                 
                 
                 <li><a href="contact.php">Contact</a></li>
