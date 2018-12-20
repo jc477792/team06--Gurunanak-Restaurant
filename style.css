@@ -676,6 +676,7 @@ textarea:focus {
   position: relative;
   z-index: 1; }
   .single-best-receipe-area img {
+      max-height: 222px;
     border-bottom: 3px solid #1f14b2; }
   .single-best-receipe-area .receipe-content {
     padding-top: 30px;
@@ -1368,3 +1369,74 @@ textarea:focus {
     padding-left: 30px; }
 
 /*# sourceMappingURL=style.css.map */
+
+
+
+/* Updated changes */
+
+.footer-info {
+	position: relative;
+	float: left;
+	color: #fff;
+	margin-top: 30px;
+}
+.term-condition-link {
+	position: relative;
+	float: right;
+	color: #fff;
+	margin-top: 30px;
+}
+.footer-logo {
+	position: absolute;
+    left: 0;
+    right: 0;
+	top:17px;
+    margin: 0 auto;
+    text-align: center;
+}
+.footer-bottom {
+	float: left;
+    width: 100%;
+	padding: 15px 0;
+    background: #333;
+    text-align: center;
+}
+.footer-bottom p { color: #fff; }
+
+.middle-content {
+	padding: 70px 0;
+
+}
+
+.middle-content h2{
+	text-align: center;
+    color: #79321d;
+    margin: 0 0 50px;
+}
+
+.middle-content p {
+    color: #000;
+	font-size: 16px;
+}
+.dropdown-toggle::after{
+  display:none!important;
+}
+.dropdown-menu{
+line-height: 1;
+text-transform: uppercase;
+}
+.dropdown-menu.show{
+	
+min-width: 0px !important;
+padding:0 0.5em;	
+}
+
+.dropdown-menu a:hover{
+color: #79321d;
+font-size:14px;
+color:#ffffff;
+background-color:#79321d;
+border-bottom:3px solid #1f14b2;
+
+
+}
