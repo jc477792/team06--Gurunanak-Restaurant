@@ -2,9 +2,24 @@
 if(isset($_POST['submit']))
 {
 	$reg_time=date('d-m-Y');
-    @mysql_query("INSERT INTO customers(fname, username, pincode, address, state, city, pass, email, contact, reg_time) VALUES ('".$_POST['fname']."','".$_POST['username']."','".$_POST['pincode']."','".$_POST['address']."', '".$_POST['state']."', '".$_POST['city']."','".$_POST['pass']."','".$_POST['email']."','".$_POST['contact']."','".$reg_time."')");	
 	
-	$msg="Register Successfully......";
+	$sql="INSERT INTO customers(fname, username, pincode, address, state, city, pass, email, contact, reg_time) VALUES ('".$_POST['fname']."','".$_POST['username']."','".$_POST['pincode']."','".$_POST['address']."','', '','".$_POST['pass']."','".$_POST['email']."','".$_POST['contact']."','".$reg_time."')";
+
+
+    $result = mysqli_query($cn,$sql);
+    
+
+
+    if(isset($result)){
+       $msg="Register Successfully......";
+		header('Location: login.php');
+    }
+    else
+    {
+       $msg="Unable to register......";
+    }
+	
+	
 }
 ?>
 <!DOCTYPE html>
@@ -84,7 +99,7 @@ if(isset($_POST['submit']))
   </div>
 </div>
 <!-- ##### Footer Area Start ##### -->
-<?php include("footer.php");?>
+<?php include_once("footer.php");?>
 <script src="js/jquery/jquery-2.2.4.min.js"></script> 
 <script src="js/bootstrap/popper.min.js"></script> 
 <script src="js/bootstrap/bootstrap.min.js"></script> 
