@@ -41,11 +41,16 @@ class Admin extends CI_Controller {
 		redirect("admin/customer");
 	}
 	
-	public function store()
+	public function store($m_id=0)
 	{
 		$data=array();
 		$query = $this->db->query("SELECT * FROM menu");
+		if($m_id){
+			$storedetails=$this->db->get_where("menu" ,array( "pk_id" => $m_id))->row_array();
+			$data['store_categories']=$storedetails;
+		}
 		$data['menu']=$query;
+		
 		
 		$this->load->view('admin/store',$data);
 	}
@@ -65,13 +70,13 @@ class Admin extends CI_Controller {
 	}
 
 	
-	public function complete_store($id)
-	{
-		$data=array();
-		$query = $this->db->query("UPDATE  stores SET status = '1' where pk_id = '$id'");
-		$this->session->set_flashdata("success", " <b>Sucess</b> Menu Sucessfully Confirm.....");
-		redirect("admin/store");
-	}
+	 public function complete_store($id)
+	 {
+	 	$data=array();
+	 	$query = $this->db->query("UPDATE  stores SET status = '1' where pk_id = '$id'");
+	 	$this->session->set_flashdata("success", " <b>Sucess</b> Menu Sucessfully Confirm.....");
+	 	redirect("admin/store");
+	 }
 	
 	
 	public function store_completed()
@@ -205,26 +210,36 @@ class Admin extends CI_Controller {
 		$data['total_cat']=$n;
 		$this->load->view('admin/cat_add',$data);
 	}
-	public function cat_save()
-	{
-		$img_name = "";
-		$config['upload_path'] = './images/';
-		$config['allowed_types']='gif|jpg|png|jpeg';
-		$this->load->library('upload', $config);
-		if($this->upload->do_upload())
-		{
-			$c_description=$this->upload->data();
-			$img_name=$c_description["file_name"];
-		}else {
-			die("opps!");
-		}
-		
-		$data["c_name"] = $this->input->post("c_name");
-		$data["c_description"] = $img_name;
-		$this->db->insert("store_categories",$data);
-		$this->session->set_flashdata("success", "Category Add Sucessfully");
-		redirect('admin/cat_list');		
-	}
+	public function cat_save() {
+        $filename = "";
+        if (!empty($_FILES)) {
+            $config['upload_path'] = '././uploads/cat/';
+            $config['max_size'] = 0;
+            $config['overwrite'] = true;
+            $config['allowed_types'] = 'gif|jpg|png';
+            $this->load->library('upload', $config);
+            if ($this->upload->do_upload('userimage')) {
+                $upload_data = $this->upload->data();
+                $filename = $upload_data['file_name'];
+            } else {
+
+				$error = $this->upload->display_errors();
+				$this->session->set_flashdata("error",$error);
+                $upData = array('upload_data' => $this->upload->data());
+            }
+        }
+        $data['filename'] = $filename;
+        $data["c_name"] = $this->input->post("c_name");
+        $data["c_description"] = $this->input->post("c_description");
+        if ($data['c_name'] != null || $data['c_name'] != "") {
+            $this->db->insert("store_categories", $data);
+            $this->session->set_flashdata("success", "Category Add Sucessfully");
+            redirect('admin/cat_list');
+        } else {
+            $this->session->set_flashdata("success", "Category Name cannot be blank");
+            redirect('admin/cat_add');
+        }
+    }
 	
 	public function cat_list()
 	{
@@ -246,34 +261,44 @@ class Admin extends CI_Controller {
 		
 	}
 	
-	public function cat_update()
-	{
-		$c_id=$this->input->post('c_id');
-		$c_name=$this->input->post('c_name');
-		
-		$img_name = "";
-		$config['upload_path'] = './images/';
-		$config['allowed_types']='gif|jpg|png|jpeg';
-		$this->load->library('upload', $config);
-		if($this->upload->do_upload())
-		{
-			$c_description=$this->upload->data();
-			$img_name=$c_description["file_name"];
-		}else {
-			die("opps!");
-		}
+	public function cat_update() {
 
-			$data = array(
-               'c_name' => $c_name,
-			   'c_description' => $img_name
-            );
+        $c_id = $this->input->post('c_id');
+        $c_name = $this->input->post('c_name');
+        $c_description = $this->input->post('c_description');
+        $filename = "";
+        if (!empty($_FILES)) {
+            $config['upload_path'] = '././uploads/cat/';
+            $config['max_size'] = 0;
+            $config['overwrite'] = false;
+            $config['allowed_types'] = 'gif|jpg|png';
+            $this->load->library('upload', $config);
+            if ($this->upload->do_upload('userimage')) {
+                $upload_data = $this->upload->data();
+                $filename = $upload_data['file_name'];
+            } else {
 
-		$this->db->where('c_id', $c_id);
-		$this->db->update('store_categories', $data); 
-		$this->session->set_flashdata("success", "Category sucessfully update.");
-		redirect('admin/cat_list');		
-		
-	}
+				$error = $this->upload->display_errors();
+				$this->session->set_flashdata("error",$error);
+                $upData = array('upload_data' => $this->upload->data());
+            }
+        }
+       
+        $data = array(
+            'c_name' => $c_name,
+            'c_description' => $c_description,
+            'filename' => $filename
+        );
+        if ($c_name != null || $c_name != "") {
+            $this->db->where('c_id', $c_id);
+            $this->db->update('store_categories', $data);
+            $this->session->set_flashdata("success", "Category sucessfully update.");
+            redirect('admin/cat_list');
+        } else {
+            $this->session->set_flashdata("error", "Category update error.");
+            redirect('admin/cat_edit', $c_id);
+        }
+    }
 	
 	public function cat_remove($c_id)
 	{
@@ -283,31 +308,76 @@ class Admin extends CI_Controller {
 		redirect('admin/cat_list');	
 	}
 	
-	public function products_create()
-	{
-		
-		$img_name = "";
-		$config['upload_path'] = './images/';
-		$config['allowed_types']='gif|jpg|png|jpeg';
-		$this->load->library('upload', $config);
-		if($this->upload->do_upload())
-		{
-			$img=$this->upload->data();
-			$img_name=$img["file_name"];
-		}else {
-			die("opps!");
-		}
-		
-		$data["name"] = $this->input->post("name");
-		$data["cat_id"] = $this->input->post("cat_id");
-		$data["description"] = $this->input->post("description");
-		$data["price"] = $this->input->post("price");
-		$data["dateadded"] =date('d-m-Y');
-		$data["img"] = $img_name;
-		$this->db->insert("menu",$data);
-		redirect('admin/store');	
-	}
-	
+	public function products_create() {
+        $filename = "";
+        if (!empty($_FILES)) {
+            $config['upload_path'] = './uploads/menu/';
+            $config['max_size'] = 0;
+            $config['overwrite'] = true;
+            $config['allowed_types'] = 'gif|jpg|png';
+            $this->load->library('upload', $config);
+            if ($this->upload->do_upload('userimage')) {
+                $upload_data = $this->upload->data();
+                $filename = $upload_data['file_name'];
+            } else {
+
+                $error = $this->upload->display_errors();
+                $upData = array('upload_data' => $this->upload->data());
+            }
+        }
+        $data['img'] = $filename;
+
+        $data["name"] = $this->input->post("name");
+        $data["cat_id"] = $this->input->post("cat_id");
+        $data["description"] = $this->input->post("description");
+        $data["price"] = $this->input->post("price");
+        $data["dateadded"] = date('d-m-Y');
+
+        $this->db->insert("menu", $data);
+        redirect('admin/store');
+    }
+
+    public function products_update() {
+        $c_id = $this->input->post('m_id');
+        if ($c_id) {
+            $filename = "";
+            if (!empty($_FILES)) {
+                $config['upload_path'] = './uploads/menu/';
+                $config['max_size'] = 0;
+                $config['overwrite'] = true;
+                $config['allowed_types'] = 'gif|jpg|png';
+                $this->load->library('upload', $config);
+                if ($this->upload->do_upload('userimage')) {
+                    $upload_data = $this->upload->data();
+                    $filename = $upload_data['file_name'];
+                } else {
+
+                    $error = $this->upload->display_errors();
+                    $upData = array('upload_data' => $this->upload->data());
+                }
+            }
+            $data['img'] = $filename;
+            $data["name"] = $this->input->post("name");
+            $data["cat_id"] = $this->input->post("cat_id");
+            $data["description"] = $this->input->post("description");
+            $data["price"] = $this->input->post("price");
+            $data["dateadded"] = date('d-m-Y');
+            $update = array(
+                'name' => $data['name'],
+                'description' => $data['description'],
+                'cat_id' => $data["cat_id"],
+                'price' => $data["price"],
+                'img'=>$data['img']
+                
+            );
+            $this->db->where('pk_id', $c_id);
+            $this->db->update("menu", $update);
+            redirect('admin/store_completed');
+        } else {
+            redirect('admin/store');
+        }
+    }
+
 	
 	public function cat_deals()
 	{
@@ -330,7 +400,18 @@ class Admin extends CI_Controller {
 		$this->load->view('admin/user_list',$data);	
 	}
 	
-	
+	public function catshow($cat_id=""){
+		if($cat_id){
+			$query=$this->db->get_where("menu" ,array( "cat_id" => $cat_id))->row_array();
+			$query_cat=$this->db->get_where("store_categories",array("c_name"=>$cat_id))->row_array();
+			$data['menu']=$query;
+			//$n=$data['menu'];
+			// $data['total_menu']=$n;
+			$data['cat']=$query_cat;
+			$this->load->view('menu_list',$data);
+
+		}
+	}
 	function ajax_call() {
 	
 		if( $_REQUEST["name"] )
@@ -340,4 +421,35 @@ class Admin extends CI_Controller {
 		}
 	}
 	
+        function showReservation(){
+                $data=array();
+		$query = $this->db->query("SELECT * FROM tbl_reservation");
+		$data['reservations']=$query;
+		$n=$query->num_rows();
+		$data['total_cat']=$n;
+		$this->load->view('admin/showReservation',$data);
+            
+        }
+        function acceptReservation(){
+            $id=$this->input->get('id');
+            $update=array(
+                'status' =>2,
+                'updated'=>date('Y-m-d H:i:s')
+            );
+            $this->db->where('id', $id);
+            $this->db->update("tbl_reservation", $update);
+            redirect('admin/showReservation');
+        }
+        function declineReservation(){
+            $id=$this->input->post('id');
+            $comment= $this->input->post('comment');
+            $update=array(
+                'status' =>3,
+                'comment'=>$comment,
+                 'updated'=>date('Y-m-d H:i:s')
+            );
+            $this->db->where('id', $id);
+            $this->db->update("tbl_reservation", $update);
+            redirect('admin/showReservation');
+        }
 }
