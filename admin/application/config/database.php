@@ -49,11 +49,10 @@ $active_group = 'default';
 $active_record = TRUE;
 
 $db['default']['hostname'] = 'localhost';
-$db['default']['username'] = 'root';
-$db['default']['password'] = '';
-$db['default']['database'] = 'gurunanak';
-$db['default']['dbdriver'] = 'mysql';
-$db['default']['dbdriver'] = 'mysql';
+$db['default']['username'] = 'guru@ictatjcub.com';
+$db['default']['password'] = '123zxcA!';
+$db['default']['database'] = 'ictatjcu_guru';
+$db['default']['dbdriver'] = 'mysqli';
 $db['default']['dbprefix'] = '';
 $db['default']['pconnect'] = TRUE;
 $db['default']['db_debug'] = TRUE;
