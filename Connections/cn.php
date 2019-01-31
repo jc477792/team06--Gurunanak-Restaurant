@@ -3,9 +3,9 @@
 # Type="MYSQL"
 # HTTP="true"
 $hostname_cn = "localhost";
-$database_cn = "gurunanak";
-$username_cn = "root";
-$password_cn = "";
-$cn = mysql_pconnect($hostname_cn, $username_cn, $password_cn) or trigger_error(mysql_error(),E_USER_ERROR); 
-mysql_select_db($database_cn, $cn);
+$database_cn = "ictatjcu_guru";
+$username_cn = "guru@ictatjcub.com";
+$password_cn = "123zxcA!";
+$cn = new mysqli($hostname_cn, $username_cn, $password_cn ,$database_cn);
+
 ?>
