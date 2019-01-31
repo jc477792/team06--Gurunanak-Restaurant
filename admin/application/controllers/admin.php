@@ -453,3 +453,154 @@ class Admin extends CI_Controller {
             redirect('admin/showReservation');
         }
 }
+
+function showOrders(){
+            $groups= $this->db->query('Select DISTINCT orderGroup from tbl_orders')->result_array();
+            foreach ($groups as $g=>$o){
+           $query= $this->db->query("SELECT *,DATE(`date`) < DATE(curdate()) AS is_old FROM tbl_orders where orderGroup=".$o['orderGroup']);
+           $orders=$query->result_array();
+            //$data['orders'][$o['orderGroup']]=$query->result_array();
+            $t=[];
+            foreach($orders as $d=>$q){
+                $data['orders'][$o['orderGroup']]['is_old']=$q['is_old'];
+                $data['orders'][$o['orderGroup']]['orderGroup']=$q['orderGroup'];
+                $data['orders'][$o['orderGroup']]['date']=$q['date'];
+                 if(isset($t[$q['item_id']])){
+                $t[$q['item_id']]+=$q['quantity'];
+                 }else{
+                      $t[$q['item_id']]=$q['quantity'];
+                 }
+                $customer=$this->db->query("SELECT fname,lname FROM customers where pk_id=".$q['user_id'])->row();
+                $menu=$this->db->query("SELECT pk_id,name,price FROM menu where pk_id=".$q['item_id'])->result_array();
+                if(isset($customer)){
+                $data['orders'][$o['orderGroup']]['customers']=$customer->fname." ".$customer->lname;
+                }
+                if(isset($menu)){
+                    foreach($menu as $m){
+                        $data['orders'][$o['orderGroup']]['menu'][$m['pk_id']]=$m;
+                        $data['orders'][$o['orderGroup']]['menu'][$m['pk_id']]['total']=$m['price']*$t[$m['pk_id']];
+                        $data['orders'][$o['orderGroup']]['menu'][$m['pk_id']]['quantity']=$t[$m['pk_id']];
+                    }
+                        
+                }
+                
+                
+            }
+        }
+		$this->load->view('admin/orders',$data);
+        }
+        
+        public function offer_add()
+                {
+		
+	$query = $this->db->query("SELECT * FROM tbl_offers");
+		$n=$query->num_rows();
+		$data['total']=$n;
+		$this->load->view('admin/offer_add',$data);
+	}
+	public function offer_save() {
+        $filename = "";
+        if (!empty($_FILES)) {
+            $config['upload_path'] = '././uploads/offer/';
+            $config['max_size'] = 0;
+            $config['overwrite'] = true;
+            $config['allowed_types'] = 'gif|jpg|png';
+            $this->load->library('upload', $config);
+            if ($this->upload->do_upload('userimage')) {
+                $upload_data = $this->upload->data();
+                $filename = $upload_data['file_name'];
+            } else {
+
+				$error = $this->upload->display_errors();
+				$this->session->set_flashdata("error",$error);
+                $upData = array('upload_data' => $this->upload->data());
+            }
+        }
+        $data['filename'] = $filename;
+        $data['type']=$this->input->post('type');
+        $data["name"] = $this->input->post("name");
+        $data["content"] = $this->input->post("content");
+        if ($data['name'] != null || $data['name'] != "") {
+            $this->db->insert("tbl_offers", $data);
+            $this->session->set_flashdata("success", "Offer Add Sucessfully");
+            redirect('admin/offer_list');
+        } else {
+            $this->session->set_flashdata("success", "Offer Name cannot be blank");
+            redirect('admin/offer_add');
+        }
+    }
+	
+	public function offer_list()
+	{
+		$data=array();
+		$query = $this->db->query("SELECT * FROM tbl_offers");
+		$data['offers']=$query;
+		$n=$query->num_rows();
+		$data['total']=$n;
+		$this->load->view('admin/offer_list',$data);	
+	}
+	
+	public function offer_edit($c_id)
+	{
+		$data=array();
+		$query = $this->db->get_where("tbl_offers" ,array( "id" => $c_id))->row_array();
+		$data['offer']=$query;
+               
+		
+		$n=$this->db->query("SELECT * FROM tbl_offers")->num_rows();
+		$data['total']=$n;
+		$this->load->view('admin/offer_add',$data);
+			
+		
+	}
+	
+	public function offer_update() {
+
+        $id = $this->input->post('id');
+        $name = $this->input->post('name');
+        $type=$this->input->post('type');
+        $content = $this->input->post('content');
+        $filename = "";
+        if (!empty($_FILES)) {
+            $config['upload_path'] = '././uploads/offer/';
+            $config['max_size'] = 0;
+            $config['overwrite'] = false;
+            $config['allowed_types'] = 'gif|jpg|png';
+            $this->load->library('upload', $config);
+            if ($this->upload->do_upload('userimage')) {
+                $upload_data = $this->upload->data();
+                $filename = $upload_data['file_name'];
+            } else {
+
+				$error = $this->upload->display_errors();
+				$this->session->set_flashdata("error",$error);
+                $upData = array('upload_data' => $this->upload->data());
+            }
+        }
+       
+        $data = array(
+            'name' => $name,
+            'content' => $content,
+            'type'=>$type,
+            'filename' => $filename
+        );
+        if ($name != null || $name != "") {
+            $this->db->where('id', $id);
+            $this->db->update('tbl_offers', $data);
+            $this->session->set_flashdata("success", "Offer sucessfully update.");
+            redirect('admin/offer_list');
+        } else {
+            $this->session->set_flashdata("error", "Offer update error.");
+            redirect('admin/offer_edit', $id);
+        }
+    }
+	
+	public function offer_remove($c_id)
+	{
+		
+		$this->db->delete('tbl_offers', array('id' => $c_id)); 
+		$this->session->set_flashdata("success", "Offer Remove Sucessfully.");
+		redirect('admin/offer_list');	
+	}
+	
+}
